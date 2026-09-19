@@ -14,6 +14,8 @@
 <body>
 
 <div class="noise-overlay"></div>
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
 <nav id="navbar">
   <div class="nav-inner">
@@ -22,18 +24,19 @@
       <span></span><span></span><span></span>
     </button>
     <ul class="nav-links" id="navLinks">
-      <li><a href="#about">About</a></li>
-      <li><a href="#skills">Skills</a></li>
-      <li><a href="#projects">Projects</a></li>
-      <li><a href="#contact">Contact</a></li>
+      <li><a href="#about" data-section="about">About</a></li>
+      <li><a href="#skills" data-section="skills">Skills</a></li>
+      <li><a href="#projects" data-section="projects">Projects</a></li>
+      <li><a href="#contact" data-section="contact">Contact</a></li>
     </ul>
   </div>
 </nav>
 
 <header id="top" class="hero">
+  <canvas id="neuralCanvas" class="hero-canvas"></canvas>
   <div class="hero-bg"></div>
   <div class="hero-inner reveal">
-    <p class="hero-eyebrow">Applied AI Engineer</p>
+    <p class="hero-eyebrow"><span id="roleCycle">Applied AI Engineer</span><span class="cursor-blink">|</span></p>
     <h1 class="hero-title">Rajan N</h1>
     <p class="hero-subtitle">
       I build production LLM systems — RAG pipelines, multi-cloud model orchestration,
@@ -41,11 +44,12 @@
       AI-safety and prompt-injection research.
     </p>
     <div class="hero-cta">
-      <a href="#projects" class="btn btn-primary">View Projects</a>
-      <a href="#contact" class="btn btn-outline">Get in Touch</a>
+      <a href="#projects" class="btn btn-primary magnetic">View Projects</a>
+      <a href="#contact" class="btn btn-outline magnetic">Get in Touch</a>
     </div>
     <div class="hero-links">
       <a href="https://github.com/rajannnnnnn" target="_blank" rel="noopener">GitHub ↗</a>
+      <a href="https://www.linkedin.com/in/rajan-n-a30014235/" target="_blank" rel="noopener">LinkedIn ↗</a>
       <a href="mailto:rajanofficial002@gmail.com">Email ↗</a>
     </div>
   </div>
@@ -59,29 +63,31 @@
       <p class="section-kicker">01 — About</p>
       <h2 class="section-title">Grounded in shipping, curious about breaking things.</h2>
       <p class="about-text">
-        I'm an AI engineer focused on turning large language models into systems that
-        hold up under real constraints — correctness, latency, cost, and trust. My work
+        I'm an AI engineer who owns systems end-to-end — from architecture and model
+        selection through deployment, monitoring, and the on-call reality of keeping an
+        LLM system correct under real constraints: latency, cost, and trust. My work
         spans retrieval-augmented generation, LLM inference optimization, and multi-cloud
-        model orchestration across AWS Bedrock, GCP Vertex AI, and Azure OpenAI.
+        model orchestration across AWS Bedrock, GCP Vertex AI, and Azure OpenAI, shipped
+        and operated in production, not left in a notebook.
       </p>
       <p class="about-text">
         Outside of building, I run independent security research on LLM applications —
         probing production chat systems for prompt-injection and policy-bypass
         vulnerabilities, and reporting findings through coordinated disclosure. I think
-        the two disciplines sharpen each other: you design better guardrails once you've
-        tried seriously to break them.
+        the two disciplines sharpen each other: you design better guardrails, and take
+        deployment more seriously, once you've tried hard to break what you shipped.
       </p>
       <div class="about-stats">
         <div class="stat">
-          <span class="stat-num">1+</span>
+          <span class="stat-num" data-count-to="1" data-suffix="+">0</span>
           <span class="stat-label">Year building production LLM systems</span>
         </div>
         <div class="stat">
-          <span class="stat-num">3</span>
+          <span class="stat-num" data-count-to="3">0</span>
           <span class="stat-label">Cloud LLM platforms orchestrated</span>
         </div>
         <div class="stat">
-          <span class="stat-num">2</span>
+          <span class="stat-num" data-count-to="2">0</span>
           <span class="stat-label">Independent research projects shipped</span>
         </div>
       </div>
@@ -91,35 +97,39 @@
   <section id="skills" class="section section-alt">
     <div class="section-inner reveal">
       <p class="section-kicker">02 — Skills</p>
-      <h2 class="section-title">Toolbox</h2>
+      <h2 class="section-title">Not a keyword list. Click through to the receipts.</h2>
       <div class="skills-grid">
         <div class="skill-group">
-          <h3>LLM & AI Systems</h3>
+          <h3>LLM & GenAI Systems</h3>
           <ul>
-            <li>RAG architecture & semantic search</li>
+            <li>RAG architecture & semantic search <a href="#project-clausecheck" class="proof-link">proof →</a></li>
+            <li>Temporal-aware retrieval & citation grounding <a href="#project-clausecheck" class="proof-link">proof →</a></li>
             <li>Prompt engineering & evaluation</li>
             <li>Multi-cloud orchestration (Bedrock, Vertex AI, Azure OpenAI)</li>
+            <li>LLM fine-tuning</li>
             <li>LiteLLM, LangGraph, agentic pipelines</li>
-            <li>LLM application security & prompt-injection testing</li>
+            <li>LLM application security & prompt-injection testing <a href="#project-deepseek" class="proof-link">proof →</a></li>
           </ul>
         </div>
         <div class="skill-group">
-          <h3>Engineering</h3>
+          <h3>Machine Learning & NLP</h3>
+          <ul>
+            <li>Classical ML & deep learning</li>
+            <li>Natural language processing</li>
+            <li>Model evaluation & benchmarking</li>
+            <li>PyTorch</li>
+          </ul>
+        </div>
+        <div class="skill-group">
+          <h3>Deployment & Ownership</h3>
           <ul>
             <li>Python, FastAPI</li>
-            <li>Vector databases (pgvector)</li>
-            <li>Redis caching, inference optimization</li>
-            <li>PyTorch</li>
+            <li>Docker, container orchestration</li>
+            <li>Data engineering pipelines, Airflow</li>
+            <li>Vector databases (pgvector), Redis caching</li>
+            <li>Inference optimization & cost control</li>
+            <li>End-to-end ownership: design → ship → monitor <a href="#project-clausecheck" class="proof-link">proof →</a></li>
             <li>SQL</li>
-          </ul>
-        </div>
-        <div class="skill-group">
-          <h3>Data & Analysis</h3>
-          <ul>
-            <li>Power BI dashboarding</li>
-            <li>Data pipeline design</li>
-            <li>Predictive modeling</li>
-            <li>Machine learning (classical & deep learning)</li>
           </ul>
         </div>
       </div>
@@ -131,7 +141,7 @@
       <p class="section-kicker">03 — Featured Work</p>
       <h2 class="section-title">Selected Projects</h2>
 
-      <div class="project-card">
+      <div class="project-card" id="project-clausecheck">
         <div class="project-card-header">
           <span class="project-tag">System Design · AI for Regulated Finance</span>
           <h3>ClauseCheck</h3>
@@ -165,7 +175,7 @@
         </div>
       </div>
 
-      <div class="project-card">
+      <div class="project-card" id="project-deepseek">
         <div class="project-card-header">
           <span class="project-tag">Independent Security Research</span>
           <h3>AI Safety Vulnerability Disclosure</h3>
@@ -196,18 +206,6 @@
             <span class="more-card-title">llm-chat</span>
             <span class="more-card-desc">A chat interface built for experimenting with LLM integrations.</span>
           </a>
-          <a class="more-card" href="https://github.com/rajannnnnnn/Brain-Tumor-Prediction" target="_blank" rel="noopener">
-            <span class="more-card-title">Brain Tumor Prediction</span>
-            <span class="more-card-desc">Deep learning model for classifying brain tumors from MRI scans.</span>
-          </a>
-          <a class="more-card" href="https://github.com/rajannnnnnn/Detection-of-Distracted-Drivers-on-Road" target="_blank" rel="noopener">
-            <span class="more-card-title">Distracted Driver Detection</span>
-            <span class="more-card-desc">Computer vision model to classify driver distraction from images.</span>
-          </a>
-          <a class="more-card" href="https://github.com/rajannnnnnn/PowerBI-BANK_LOAN_PERFORMANCE_ANALYSIS" target="_blank" rel="noopener">
-            <span class="more-card-title">Bank Loan Performance Analysis</span>
-            <span class="more-card-desc">Power BI dashboard analyzing loan portfolio performance metrics.</span>
-          </a>
           <a class="more-card" href="https://github.com/rajannnnnnn?tab=repositories" target="_blank" rel="noopener">
             <span class="more-card-title">View all repositories →</span>
             <span class="more-card-desc">Full list of public projects on GitHub.</span>
@@ -226,8 +224,9 @@
         Open to Applied AI Engineer / LLM systems roles. Reach out directly — I reply fast.
       </p>
       <div class="contact-links">
-        <a href="mailto:rajanofficial002@gmail.com" class="btn btn-primary">rajanofficial002@gmail.com</a>
-        <a href="https://github.com/rajannnnnnn" target="_blank" rel="noopener" class="btn btn-outline">GitHub ↗</a>
+        <a href="mailto:rajanofficial002@gmail.com" class="btn btn-primary magnetic">rajanofficial002@gmail.com</a>
+        <a href="https://github.com/rajannnnnnn" target="_blank" rel="noopener" class="btn btn-outline magnetic">GitHub ↗</a>
+        <a href="https://www.linkedin.com/in/rajan-n-a30014235/" target="_blank" rel="noopener" class="btn btn-outline magnetic">LinkedIn ↗</a>
       </div>
     </div>
   </section>
