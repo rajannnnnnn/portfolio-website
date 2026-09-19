@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Safety Vulnerability Disclosure — Rajan N</title>
+<meta name="description" content="Independent AI safety research: a coordinated prompt-injection vulnerability disclosure to a major LLM chat platform.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html#top" class="logo">RN<span class="dot">.</span></a>
+    <button id="navToggle" class="nav-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="../index.html#about">About</a></li>
+      <li><a href="../index.html#skills">Skills</a></li>
+      <li><a href="../index.html#projects">Projects</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+  <div class="case-hero reveal">
+    <a href="../index.html#projects" class="breadcrumb">← Back to projects</a>
+    <span class="project-tag">Independent Security Research</span>
+    <h1>AI Safety Vulnerability Disclosure</h1>
+    <p class="case-subtitle">
+      A coordinated disclosure to a major LLM chat platform's security team, covering
+      prompt-injection techniques that bypass safety-policy enforcement.
+    </p>
+    <div class="callout callout-warn">
+      <strong>What this page deliberately does not contain:</strong> exploit templates,
+      reproduction steps, or one sensitive secondary finding reported separately to the
+      vendor's Trust & Safety team. The full technical report was submitted under TLP:AMBER
+      (restricted distribution) and remains unpublished while the finding is unpatched and
+      unacknowledged. What follows is the process, not the payload.
+    </div>
+  </div>
+
+  <section class="case-section reveal">
+    <h2>Scope</h2>
+    <p>
+      Target: a major LLM chat platform's production web interface. Approach: black-box
+      testing with no privileged access or special tooling — everything reproducible
+      through the normal chat UI a real user has. Focus: whether adversarial framing of a
+      single user message could get the model to override its own safety-policy
+      enforcement.
+    </p>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Findings, at the level I can responsibly publish</h2>
+    <div class="case-stats">
+      <div class="case-stat"><span class="case-stat-num">2</span><span class="case-stat-label">independently-worded prompt-injection technique families, each a policy-enforcement bypass</span></div>
+      <div class="case-stat"><span class="case-stat-num">1</span><span class="case-stat-label">message</span></div>
+      <div class="case-stat"><span class="case-stat-num">8</span><span class="case-stat-label">documented test sessions, each backed by the platform's own share links as reproducibility evidence</span></div>
+      <div class="case-stat"><span class="case-stat-num">0</span><span class="case-stat-label">prohibited content requested or generated during any test</span></div>
+    </div>
+    <p style="margin-top:24px;">
+      Both technique families reproduce with a single ordinary user message and no
+      elevated access — no jailbroken client, no API-level tricks, nothing outside what
+      any user of the product could type. A separate, more sensitive finding concerning
+      the platform's classification of a specific safety-policy category was reported
+      through the same channel and flagged for direct review by the vendor's Trust &
+      Safety team; it is intentionally omitted here in full, including from this summary,
+      regardless of the embargo status of the rest of the report.
+    </p>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Why I'm not publishing more</h2>
+    <p>
+      A responsible disclosure report that leaks its own payload isn't responsible — it's
+      a public jailbreak with a cover letter. The report was marked TLP:AMBER precisely
+      because I intended it for the vendor's security team, not for general distribution,
+      and an unacknowledged, unpatched finding stays that way until the vendor has had a
+      real chance to fix it. Some categories of finding — this includes the secondary
+      safety-classification issue above — don't get published even after a fix ships;
+      the sensitivity is in the category, not the patch status.
+    </p>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>How the report was built</h2>
+    <ul>
+      <li>Full technical writeup: reproduction steps, impact analysis, root-cause hypothesis, and mitigation recommendations</li>
+      <li>Explicit separation between directly-evidenced findings and observations that would need independent validation — so the vendor's triage team could tell at a glance what was proven versus suspected</li>
+      <li>A severity assessment for each technique, not just a single overall rating</li>
+      <li>An offer to assist reproduction or answer technical questions during the vendor's review</li>
+    </ul>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Timeline</h2>
+    <ul class="timeline">
+      <li><span class="timeline-date">Testing conducted</span>Independent, self-directed testing of the platform's safety-policy enforcement — no bug bounty program prompted this; I went looking on my own.</li>
+      <li><span class="timeline-date">July 20, 2026</span>Full report submitted to the vendor's security team via their published security contact, marked TLP:AMBER.</li>
+      <li><span class="timeline-date">July 27, 2026</span>Followed up after one week with no response, requesting confirmation of receipt and asking whether the report had reached the right triage team.</li>
+      <li><span class="timeline-date">Current status</span>Awaiting vendor acknowledgment. No public advisory exists yet; this page will be updated if that changes.</li>
+    </ul>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Ownership</h2>
+    <p>
+      Nobody assigned this to me — I found the target, scoped the testing, and decided
+      what was worth reporting. Writing the finding was maybe a third of the work: the
+      rest was judgment calls that don't show up in a bug report — what's safe to
+      publish and what isn't, how to word a disclosure so a triage team can act on it
+      fast, when to follow up versus when following up looks like pressure, and where to
+      draw the line on a sensitive finding regardless of how impressive the full details
+      would look on a portfolio. That last part is the actual point of this page.
+    </p>
+  </section>
+
+  <div class="case-cta reveal">
+    <a href="../index.html#projects" class="btn btn-outline magnetic">← Back to projects</a>
+    <a href="../index.html#contact" class="btn btn-primary magnetic">Get in touch</a>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; <span id="year"></span> Rajan N. Built with plain HTML, CSS &amp; JS.</p>
+</footer>
+
+<script src="../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ClauseCheck — Rajan N</title>
+<meta name="description" content="ClauseCheck: an RBI-grounded lending compliance auditor for Indian NBFCs — architecture, data model, and design decisions.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html#top" class="logo">RN<span class="dot">.</span></a>
+    <button id="navToggle" class="nav-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="../index.html#about">About</a></li>
+      <li><a href="../index.html#skills">Skills</a></li>
+      <li><a href="../index.html#projects">Projects</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+  <div class="case-hero reveal">
+    <a href="../index.html#projects" class="breadcrumb">← Back to projects</a>
+    <span class="project-tag">System Design · AI for Regulated Finance</span>
+    <h1>ClauseCheck</h1>
+    <p class="case-subtitle">
+      An AI system that audits NBFC loan files against Reserve Bank of India regulations,
+      built around one non-negotiable: a citation is only valid if the regulation was
+      actually in force on the date being judged.
+    </p>
+    <div class="callout">
+      <strong>Status:</strong> Product requirements, system architecture, and a ~12,000-word
+      low-level implementation spec (data model, algorithms, prompts, API contracts, task
+      breakdown with runnable acceptance criteria) are complete and approved for build.
+      Implementation is in progress against that specification.
+    </div>
+  </div>
+
+  <section class="case-section reveal">
+    <h2>The problem</h2>
+    <p>
+      Indian NBFCs are audited against a rulebook that changed three times in eighteen
+      months: the RBI repealed the 2022 digital lending guidelines in May 2025, folded a
+      dozen circulars into a single Responsible Business Conduct instrument in November
+      2025, and notified a recovery-conduct amendment in August 2026 that commences
+      January 2027. A compliance team is checking today's loan files against one
+      rulebook, last quarter's against another, and preparing for a third that hasn't
+      started yet — by hand, in spreadsheets, on a sample of accounts.
+    </p>
+    <p>Three obvious approaches fail for specific, checkable reasons:</p>
+    <ul>
+      <li><strong>A rules engine over structured data</strong> — the facts live in PDFs, some scanned, in layouts that differ by product and vintage.</li>
+      <li><strong>A general-purpose LLM asked "is this compliant?"</strong> — it answers from training-data law that's already at least one repeal out of date, and produces confident citations to provisions that don't exist or haven't commenced.</li>
+      <li><strong>Keyword search over the circulars</strong> — the real question is never "does the phrase appear" but "which of four overlapping instruments governed this obligation on 3 September 2026."</li>
+    </ul>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Architecture — three stages, joined only by database rows</h2>
+    <pre class="case-diagram">                 ┌────────────────────────────────────────┐
+compliance  ────▶ │  FastAPI gateway                       │
+analyst           │  auth · tenant scope · idempotency      │
+                 └──────────────┬─────────────────────────┘
+                                │ enqueue
+                                ▼
+                 ┌────────────────────────────────────────┐
+                 │  Redis — broker + result backend        │
+                 └──────────────┬─────────────────────────┘
+          ┌────────────────────┴──────────────────────┐
+          ▼                                            ▼
+┌──────────────────────┐                   ┌──────────────────────┐
+│ queue: extract       │                   │ queue: assess        │
+└──────────┬───────────┘                   └──────────┬───────────┘
+          │                                          │
+┌──────────▼───────────┐  ┌──────────────────┐  ┌─────▼────────────────────┐
+│ STAGE A              │  │ STAGE B          │  │ STAGE C                  │
+│ parse → classify →   │─▶│ applicability →  │─▶│ rules → model → citation │
+│ extract → redact →   │  │ pinning →        │  │ validator → severity →   │
+│ span-verify          │  │ vector+lexical → │  │ persist                  │
+│                      │  │ fusion           │  │                          │
+└──────────┬───────────┘  └────────┬─────────┘  └─────┬────────────────────┘
+          │                       │                  │
+          │            ┌──────────▼──────────────────▼──────────┐
+          └───────────▶│  PostgreSQL 16 + pgvector              │
+                       │  facts · clauses · assessments ·       │
+                       │  conflicts · audit · eval              │
+                       └──────────────┬─────────────────────────┘
+                                      ▼
+                            ┌────────────────────┐
+                            │ conflict detector  │
+                            │ (deterministic)    │
+                            └────────────────────┘</pre>
+    <p>
+      <strong>Stage A (extraction) is closed-schema and legally ignorant</strong> — it reads
+      one document and emits typed facts against a fixed field registry, never reasoning
+      about law. That narrowness is deliberate: it's small enough to fine-tune a small
+      open-weight model on, and narrow enough to evaluate with exact-match metrics.
+    </p>
+    <p>
+      <strong>Stage B (retrieval) is mostly deterministic.</strong> A field key plus an
+      event date resolves through a pinning table to candidate clause paths; vector and
+      lexical search only widen recall, they're not the primary mechanism.
+    </p>
+    <p>
+      <strong>Stage C (verdict) is the only place legal reasoning happens</strong>, on a
+      hosted frontier model, and every output passes through a code-level citation
+      validator that rejects any verdict whose citations don't resolve.
+    </p>
+    <p>
+      The rejected alternative — one prompt that reads a document and returns violations
+      — is undebuggable: when it's wrong, you can't tell whether it misread the document,
+      retrieved the wrong rule, or reasoned badly. Separation is what makes each stage
+      independently measurable, which is the product's actual claim to correctness.
+    </p>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>By the numbers</h2>
+    <div class="case-stats">
+      <div class="case-stat"><span class="case-stat-num">~60</span><span class="case-stat-label">typed fields extracted per document, each with a redacted evidence span</span></div>
+      <div class="case-stat"><span class="case-stat-num">27</span><span class="case-stat-label">deterministic rules, 9 of them exact date/money arithmetic</span></div>
+      <div class="case-stat"><span class="case-stat-num">4</span><span class="case-stat-label">concurrent temporal layers of regulation the corpus must resolve</span></div>
+      <div class="case-stat"><span class="case-stat-num">4</span><span class="case-stat-label">verdict classes: compliant, violation, ambiguous, no clause found</span></div>
+      <div class="case-stat"><span class="case-stat-num">12</span><span class="case-stat-label">cross-document conflict groups (APR, tenor, fees, closure timelines…)</span></div>
+      <div class="case-stat"><span class="case-stat-num">3</span><span class="case-stat-label">model serving modes named explicitly, each recorded per assessment</span></div>
+      <div class="case-stat"><span class="case-stat-num">0%</span><span class="case-stat-label">target hallucinated-citation rate — a release blocker, not a metric to improve</span></div>
+      <div class="case-stat"><span class="case-stat-num">&lt;$25</span><span class="case-stat-label">per-month target hosting budget for the always-on demo deployment</span></div>
+    </div>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Data model: clause identity is the load-bearing detail</h2>
+    <p>
+      RBI instruments in this family use continuous paragraph numbering, not decimal
+      clause numbering — chapters are navigational headings only. Getting this wrong
+      produces citations that don't resolve, which in this system is the one
+      unrecoverable defect. Canonical identifier format:
+    </p>
+    <p><span class="code-inline">{instrument_code}/p{para}[/{level2}][/{level3}]</span></p>
+    <p>
+      Real: <span class="code-inline">DL2025/p9/ii</span>,
+      <span class="code-inline">RBC2025/p30/1</span>,
+      <span class="code-inline">RBC-AMD2026/p100W/4</span>.
+      Never real, and forbidden anywhere in the codebase:
+      <span class="code-inline">DL2025/Ch.IV/4.2(a)</span>.
+    </p>
+    <p>
+      Every clause carries an effective window, and every retrieval takes a mandatory
+      as-of date — the event date of the fact being judged, never "today." There is no
+      default; retrieval without one raises an error. Supersessions are stored as
+      records, not implied by absence, so the system can answer "why didn't you cite the
+      2022 guidelines" with a row, not a shrug.
+    </p>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Evaluation, by stage — because an end-to-end score hides where errors live</h2>
+    <ul>
+      <li><strong>Extraction:</strong> per-field exact match, precision/recall as a set task, absence accuracy, and span-grounding rate — reported per field key, not just in aggregate, because the aggregate is dominated by the easy fields.</li>
+      <li><strong>Retrieval:</strong> recall@1/4/8 of the decisive clause, mean reciprocal rank, pinning hit rate, and applicability-filter precision.</li>
+      <li><strong>Verdict:</strong> accuracy per class with a confusion matrix, citation validity rate (100% by construction — any shortfall means the validator has a hole), and abstention correctness as its own suite, because it's the behaviour most likely to regress when a model is made "better."</li>
+      <li><strong>Adversarial suite:</strong> a loan agreement is attacker-controlled text from the system's point of view — a document can contain an instruction to mark the account compliant, and the correct behaviour is to extract that sentence as text and stay entirely unmoved by it.</li>
+    </ul>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Architectural decisions of record</h2>
+    <table class="adr-table">
+      <thead><tr><th>Decision</th><th>Rejected alternative</th><th>Rationale</th></tr></thead>
+      <tbody>
+        <tr><td>Three stages joined by database rows</td><td>One monolithic prompt</td><td>Per-stage measurement; independent failure attribution</td></tr>
+        <tr><td>Citation validation in code</td><td>Prompt-level instruction</td><td>A prompt cannot guarantee an invariant</td></tr>
+        <tr><td>Mandatory as-of date on retrieval</td><td>Timeless corpus</td><td>Four concurrent temporal layers; wrong in both directions otherwise</td></tr>
+        <tr><td>Deterministic conflict trigger</td><td>Agentic planner</td><td>An open-ended planner can't be asserted about in a test</td></tr>
+        <tr><td>Redacted spans, no document bytes</td><td>Full copy, or offsets only</td><td>Auditable without holding customer data</td></tr>
+        <tr><td>Apache-2.0 base model for the fine-tune</td><td>Llama community licence</td><td>Removes attribution, naming, and MAU flow-down constraints for in-VPC sale</td></tr>
+        <tr><td>Rules run before models</td><td>A model call for every check</td><td>Nine obligations are arithmetic; arithmetic should be exact and free</td></tr>
+        <tr><td>Public corpus manifest</td><td>Internal only</td><td>Makes the product's central claim externally checkable</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Ownership</h2>
+    <p>
+      This wasn't handed a spec to implement — I wrote the spec. Before a line of
+      production code, I owned the full arc end to end:
+    </p>
+    <ul>
+      <li>Product requirements, competitive framing, and a six-item release gate</li>
+      <li>The system architecture and every architectural decision of record above, including which alternatives I rejected and why</li>
+      <li>The full data model: field registry, clause-identity scheme, temporal versioning, row-level tenant isolation</li>
+      <li>A build-vs-buy call on model serving after verifying, provider by provider, that per-token adapter hosting had largely left the market — and designing around that constraint instead of hiding it</li>
+      <li>The evaluation architecture and the specific metrics that would catch a regression before a customer would</li>
+      <li>Deployment topology, load-testing plan, and an alerting policy deliberately capped at two alerts, because noisy alerts on a solo-operated system are worse than none</li>
+      <li>A task breakdown with acceptance criteria written as runnable commands, not prose — so "done" has one definition</li>
+    </ul>
+    <p>
+      That's the same shape of ownership I'd bring to a production LLM system on a team:
+      not just writing the model-calling code, but making — and being accountable for —
+      the trade-offs around it.
+    </p>
+  </section>
+
+  <div class="case-cta reveal">
+    <a href="../index.html#projects" class="btn btn-outline magnetic">← Back to projects</a>
+    <a href="../index.html#contact" class="btn btn-primary magnetic">Get in touch</a>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; <span id="year"></span> Rajan N. Built with plain HTML, CSS &amp; JS.</p>
+</footer>
+
+<script src="../script.js"></script>
+</body>
+</html>
