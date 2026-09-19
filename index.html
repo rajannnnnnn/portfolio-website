@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rajan N — Applied AI Engineer</title>
+<meta name="description" content="Rajan N — Applied AI Engineer specializing in production LLM systems, RAG pipelines, and AI safety research." />
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#top" class="logo">RN<span class="dot">.</span></a>
+    <button id="navToggle" class="nav-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header id="top" class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-inner reveal">
+    <p class="hero-eyebrow">Applied AI Engineer</p>
+    <h1 class="hero-title">Rajan N</h1>
+    <p class="hero-subtitle">
+      I build production LLM systems — RAG pipelines, multi-cloud model orchestration,
+      and agentic architectures — and I break them on purpose too, through independent
+      AI-safety and prompt-injection research.
+    </p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn btn-primary">View Projects</a>
+      <a href="#contact" class="btn btn-outline">Get in Touch</a>
+    </div>
+    <div class="hero-links">
+      <a href="https://github.com/rajannnnnnn" target="_blank" rel="noopener">GitHub ↗</a>
+      <a href="mailto:rajanofficial002@gmail.com">Email ↗</a>
+    </div>
+  </div>
+  <a href="#about" class="scroll-cue" aria-label="Scroll down"><span></span></a>
+</header>
+
+<main>
+
+  <section id="about" class="section">
+    <div class="section-inner reveal">
+      <p class="section-kicker">01 — About</p>
+      <h2 class="section-title">Grounded in shipping, curious about breaking things.</h2>
+      <p class="about-text">
+        I'm an AI engineer focused on turning large language models into systems that
+        hold up under real constraints — correctness, latency, cost, and trust. My work
+        spans retrieval-augmented generation, LLM inference optimization, and multi-cloud
+        model orchestration across AWS Bedrock, GCP Vertex AI, and Azure OpenAI.
+      </p>
+      <p class="about-text">
+        Outside of building, I run independent security research on LLM applications —
+        probing production chat systems for prompt-injection and policy-bypass
+        vulnerabilities, and reporting findings through coordinated disclosure. I think
+        the two disciplines sharpen each other: you design better guardrails once you've
+        tried seriously to break them.
+      </p>
+      <div class="about-stats">
+        <div class="stat">
+          <span class="stat-num">1+</span>
+          <span class="stat-label">Year building production LLM systems</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">3</span>
+          <span class="stat-label">Cloud LLM platforms orchestrated</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">2</span>
+          <span class="stat-label">Independent research projects shipped</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills" class="section section-alt">
+    <div class="section-inner reveal">
+      <p class="section-kicker">02 — Skills</p>
+      <h2 class="section-title">Toolbox</h2>
+      <div class="skills-grid">
+        <div class="skill-group">
+          <h3>LLM & AI Systems</h3>
+          <ul>
+            <li>RAG architecture & semantic search</li>
+            <li>Prompt engineering & evaluation</li>
+            <li>Multi-cloud orchestration (Bedrock, Vertex AI, Azure OpenAI)</li>
+            <li>LiteLLM, LangGraph, agentic pipelines</li>
+            <li>LLM application security & prompt-injection testing</li>
+          </ul>
+        </div>
+        <div class="skill-group">
+          <h3>Engineering</h3>
+          <ul>
+            <li>Python, FastAPI</li>
+            <li>Vector databases (pgvector)</li>
+            <li>Redis caching, inference optimization</li>
+            <li>PyTorch</li>
+            <li>SQL</li>
+          </ul>
+        </div>
+        <div class="skill-group">
+          <h3>Data & Analysis</h3>
+          <ul>
+            <li>Power BI dashboarding</li>
+            <li>Data pipeline design</li>
+            <li>Predictive modeling</li>
+            <li>Machine learning (classical & deep learning)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects" class="section">
+    <div class="section-inner reveal">
+      <p class="section-kicker">03 — Featured Work</p>
+      <h2 class="section-title">Selected Projects</h2>
+
+      <div class="project-card">
+        <div class="project-card-header">
+          <span class="project-tag">System Design · AI for Regulated Finance</span>
+          <h3>ClauseCheck</h3>
+          <p class="project-oneliner">RBI-grounded lending compliance auditor for Indian NBFCs</p>
+        </div>
+        <p class="project-desc">
+          A fully specified AI system that audits NBFC loan files against Reserve Bank
+          of India regulations — solving a problem most LLM tools get wrong: a citation
+          is only correct if the regulation was actually in force on the date being
+          judged. ClauseCheck ingests loan documents (Key Facts Statements, agreements,
+          closure sets, collections-call transcripts), extracts roughly sixty typed
+          fields per file, and returns a per-obligation verdict — compliant, violation,
+          ambiguous, or not applicable — each backed by an exact clause citation scoped
+          to the correct point in time.
+        </p>
+        <p class="project-desc">
+          The core design principle is enforced in code, not prompts: the system cannot
+          cite a clause that wasn't in effect, and it declines to manufacture a
+          violation where the rulebook is silent. Designed as a three-stage
+          architecture with deterministic conflict detection and date-arithmetic
+          checks layered on top of LLM-based extraction and retrieval.
+        </p>
+        <div class="project-meta">
+          <div class="project-tech">
+            <span>Multi-stage LLM pipeline</span>
+            <span>Temporal-aware retrieval</span>
+            <span>Structured extraction</span>
+            <span>Rule-based conflict detection</span>
+          </div>
+          <p class="project-status">Status: architecture, data model, and full build specification complete — implementation in progress</p>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-card-header">
+          <span class="project-tag">Independent Security Research</span>
+          <h3>AI Safety Vulnerability Disclosure</h3>
+          <p class="project-oneliner">Responsible disclosure to a major LLM chat platform</p>
+        </div>
+        <p class="project-desc">
+          Identified and responsibly disclosed a prompt-injection vulnerability
+          affecting safety-policy enforcement in a major LLM chat product. Submitted a
+          coordinated disclosure report to the vendor's security team, including
+          reproducible test cases, supporting evidence, a technical writeup, severity
+          assessment, and mitigation recommendations.
+        </p>
+        <div class="project-meta">
+          <div class="project-tech">
+            <span>LLM application security</span>
+            <span>Prompt-injection testing</span>
+            <span>AI safety evaluation</span>
+            <span>Coordinated disclosure</span>
+          </div>
+          <p class="project-status">Status: submitted, currently in the vendor's disclosure review process</p>
+        </div>
+      </div>
+
+      <div class="more-projects">
+        <h3 class="more-projects-title">More on GitHub</h3>
+        <div class="more-grid">
+          <a class="more-card" href="https://github.com/rajannnnnnn/llm-chat" target="_blank" rel="noopener">
+            <span class="more-card-title">llm-chat</span>
+            <span class="more-card-desc">A chat interface built for experimenting with LLM integrations.</span>
+          </a>
+          <a class="more-card" href="https://github.com/rajannnnnnn/Brain-Tumor-Prediction" target="_blank" rel="noopener">
+            <span class="more-card-title">Brain Tumor Prediction</span>
+            <span class="more-card-desc">Deep learning model for classifying brain tumors from MRI scans.</span>
+          </a>
+          <a class="more-card" href="https://github.com/rajannnnnnn/Detection-of-Distracted-Drivers-on-Road" target="_blank" rel="noopener">
+            <span class="more-card-title">Distracted Driver Detection</span>
+            <span class="more-card-desc">Computer vision model to classify driver distraction from images.</span>
+          </a>
+          <a class="more-card" href="https://github.com/rajannnnnnn/PowerBI-BANK_LOAN_PERFORMANCE_ANALYSIS" target="_blank" rel="noopener">
+            <span class="more-card-title">Bank Loan Performance Analysis</span>
+            <span class="more-card-desc">Power BI dashboard analyzing loan portfolio performance metrics.</span>
+          </a>
+          <a class="more-card" href="https://github.com/rajannnnnnn?tab=repositories" target="_blank" rel="noopener">
+            <span class="more-card-title">View all repositories →</span>
+            <span class="more-card-desc">Full list of public projects on GitHub.</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="contact" class="section section-alt">
+    <div class="section-inner reveal contact-inner">
+      <p class="section-kicker">04 — Contact</p>
+      <h2 class="section-title">Let's talk.</h2>
+      <p class="contact-text">
+        Open to Applied AI Engineer / LLM systems roles. Reach out directly — I reply fast.
+      </p>
+      <div class="contact-links">
+        <a href="mailto:rajanofficial002@gmail.com" class="btn btn-primary">rajanofficial002@gmail.com</a>
+        <a href="https://github.com/rajannnnnnn" target="_blank" rel="noopener" class="btn btn-outline">GitHub ↗</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>&copy; <span id="year"></span> Rajan N. Built with plain HTML, CSS &amp; JS.</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
