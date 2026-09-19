@@ -143,6 +143,70 @@ analyst           │  auth · tenant scope · idempotency      │
   </section>
 
   <section class="case-section reveal">
+    <h2>Cost — dev, one-off, and running</h2>
+    <p>
+      Cost isn't an afterthought here; it's tracked as a first-class artifact the same way
+      correctness is. Every hosting line item lives in a checked-in <span class="code-inline">docs/COSTS.md</span>
+      — provider, plan, price, idle-suspend behaviour, the date it was checked, and the
+      source URL — re-verified before any number is published, because cloud pricing drifts
+      under you.
+    </p>
+    <div class="case-stats">
+      <div class="case-stat"><span class="case-stat-num">&lt;$25</span><span class="case-stat-label">/month target for the always-on demo: 2 small compute instances + managed Postgres/pgvector (auto-suspend off) + managed Redis</span></div>
+      <div class="case-stat"><span class="case-stat-num">1×</span><span class="case-stat-label">one-off GPU rental for the QLoRA fine-tune run — a rented GPU vs. a managed fine-tuning API differ by under $5 at this data scale, so the call was made on portability, not price</span></div>
+      <div class="case-stat"><span class="case-stat-num">$0</span><span class="case-stat-label">object storage cost — no document bytes are ever persisted, so there's nothing to store</span></div>
+      <div class="case-stat"><span class="case-stat-num">tracked</span><span class="case-stat-label">cost per document assessed, recorded on every assessment row and published, not estimated after the fact</span></div>
+    </div>
+    <p style="margin-top:20px;">
+      Two hard deployment checks gate go-live regardless of budget: the first request after
+      sixty minutes idle must return in under two seconds (no serverless cold-start
+      surprising an evaluator), and a Redis restart must not lose any queued work that was
+      already acknowledged. A demo that stalls or silently drops work at the one moment
+      someone's actually looking has failed, however cheap it is to run.
+    </p>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Product metrics — what would actually sit on a CTO's dashboard</h2>
+    <p>
+      Every metric below is measured per stage, published, and traces to a specific eval
+      suite — not a single blended accuracy number, which hides where the errors live.
+    </p>
+    <table class="adr-table">
+      <thead><tr><th>Metric</th><th>Target, v1</th><th>Measured by</th></tr></thead>
+      <tbody>
+        <tr><td>Extraction exact-match on normalised values</td><td>≥90% on compliance-bearing fields</td><td><span class="code-inline">extraction_core</span> suite</td></tr>
+        <tr><td>Span-grounding rate</td><td>≥99%</td><td><span class="code-inline">extraction_core</span> suite</td></tr>
+        <tr><td>Retrieval recall@4 of the decisive clause</td><td>≥95%</td><td><span class="code-inline">retrieval</span> suite</td></tr>
+        <tr><td>Applicability precision</td><td>100%</td><td><span class="code-inline">retrieval</span> suite</td></tr>
+        <tr><td>Verdict accuracy, deterministic numeric rules</td><td>≥99%</td><td><span class="code-inline">numeric_rules</span> suite</td></tr>
+        <tr><td>Hallucinated-citation rate</td><td>exactly 0 — release blocker</td><td><span class="code-inline">verdict</span> suite</td></tr>
+        <tr><td>Abstention correctness</td><td>≥90%</td><td><span class="code-inline">abstention</span> suite</td></tr>
+        <tr><td>End-to-end latency per document, p95</td><td>&lt;10s</td><td>load test</td></tr>
+        <tr><td>Cost per document assessed</td><td>tracked and published</td><td>assessment rows</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:20px;"><strong>Release gate — ships when all six are true, not before:</strong></p>
+    <ul>
+      <li>A live URL an evaluator can open at any hour and get a cited verdict in under 10 seconds, no cold start, no signup</li>
+      <li>Published baseline numbers for extraction, retrieval, and verdicts — measured per stage</li>
+      <li>A measured fine-tune delta against that baseline, with cost per document on both paths</li>
+      <li>The full per-stage evaluation table including abstention and adversarial suites, hallucinated-citation rate at zero</li>
+      <li>One load test with a named bottleneck, a fix, and before/after numbers</li>
+      <li>A written technical account where every figure traces to a file in <span class="code-inline">reports/</span></li>
+    </ul>
+    <p style="margin-top:20px;">
+      <strong>Reliability, by design rather than by monitoring alone:</strong> row-level
+      security makes cross-tenant access a database-level impossibility, not an
+      application convention; alerting is deliberately capped at two conditions
+      (citation-validation failures above zero, and sustained queue depth) because noisy
+      alerts on a solo-operated system are worse than none; and every assessment is
+      traceable end to end via a propagated request ID, so one bad verdict can always be
+      walked back to the exact corpus snapshot, model version, and prompt that produced it.
+    </p>
+  </section>
+
+  <section class="case-section reveal">
     <h2>Data model: clause identity is the load-bearing detail</h2>
     <p>
       RBI instruments in this family use continuous paragraph numbering, not decimal
