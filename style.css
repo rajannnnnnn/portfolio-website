@@ -373,6 +373,13 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
   opacity: 0.82;
 }
 
+.skill-tag-icon {
+  width: 9px;
+  height: 9px;
+  fill: var(--accent-2);
+  flex-shrink: 0;
+}
+
 .proof-badge {
   display: inline-flex;
   align-items: center;
@@ -829,30 +836,98 @@ footer {
   color: var(--text-dim);
 }
 
-.adr-table {
-  width: 100%;
-  border-collapse: collapse;
+/* Metrics dashboard */
+.metric-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 14px;
   margin-top: 8px;
-  font-size: 0.88rem;
 }
-.adr-table th {
-  text-align: left;
-  color: var(--accent-2);
-  font-family: var(--font-display);
-  font-weight: 600;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--surface-border);
+.metric-tile {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  padding: 18px;
+  transition: border-color .2s ease, transform .2s ease;
+}
+.metric-tile:hover { border-color: var(--accent); transform: translateY(-2px); }
+.metric-tile-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.metric-tile-name {
   font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.adr-table td {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--surface-border);
   color: var(--text-dim);
-  vertical-align: top;
 }
-.adr-table td:first-child { color: var(--text); font-weight: 500; }
+.metric-tile-value {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--accent-2);
+  white-space: nowrap;
+}
+.metric-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.metric-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border-radius: 3px;
+}
+.metric-tile-footer {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+.metric-tile-blocker {
+  border-color: rgba(255,107,107,0.35);
+  background: rgba(255,107,107,0.05);
+}
+.metric-tile-value-blocker { color: #ff6b6b; }
+.metric-tile-flag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #ff6b6b;
+  margin-bottom: 10px;
+}
+
+/* ADR decision-log board */
+.adr-board {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+.adr-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: 14px 18px;
+  transition: border-color .2s ease, transform .2s ease;
+}
+.adr-card:hover { transform: translateX(3px); border-left-color: var(--accent-2); }
+.adr-card-decision {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.94rem;
+  margin-bottom: 6px;
+}
+.adr-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+.adr-card-meta strong { color: var(--text-dim); font-weight: 600; }
 
 .timeline {
   list-style: none;

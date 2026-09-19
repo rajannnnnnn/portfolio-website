@@ -172,20 +172,51 @@ analyst           │  auth · tenant scope · idempotency      │
       Every metric below is measured per stage, published, and traces to a specific eval
       suite — not a single blended accuracy number, which hides where the errors live.
     </p>
-    <table class="adr-table">
-      <thead><tr><th>Metric</th><th>Target, v1</th><th>Measured by</th></tr></thead>
-      <tbody>
-        <tr><td>Extraction exact-match on normalised values</td><td>≥90% on compliance-bearing fields</td><td><span class="code-inline">extraction_core</span> suite</td></tr>
-        <tr><td>Span-grounding rate</td><td>≥99%</td><td><span class="code-inline">extraction_core</span> suite</td></tr>
-        <tr><td>Retrieval recall@4 of the decisive clause</td><td>≥95%</td><td><span class="code-inline">retrieval</span> suite</td></tr>
-        <tr><td>Applicability precision</td><td>100%</td><td><span class="code-inline">retrieval</span> suite</td></tr>
-        <tr><td>Verdict accuracy, deterministic numeric rules</td><td>≥99%</td><td><span class="code-inline">numeric_rules</span> suite</td></tr>
-        <tr><td>Hallucinated-citation rate</td><td>exactly 0 — release blocker</td><td><span class="code-inline">verdict</span> suite</td></tr>
-        <tr><td>Abstention correctness</td><td>≥90%</td><td><span class="code-inline">abstention</span> suite</td></tr>
-        <tr><td>End-to-end latency per document, p95</td><td>&lt;10s</td><td>load test</td></tr>
-        <tr><td>Cost per document assessed</td><td>tracked and published</td><td>assessment rows</td></tr>
-      </tbody>
-    </table>
+    <div class="metric-dashboard">
+      <div class="metric-tile">
+        <div class="metric-tile-header"><span class="metric-tile-name">Extraction exact-match</span><span class="metric-tile-value">≥90%</span></div>
+        <div class="metric-bar"><div class="metric-bar-fill" style="width:90%"></div></div>
+        <div class="metric-tile-footer">on compliance-bearing fields · <span class="code-inline">extraction_core</span></div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-tile-header"><span class="metric-tile-name">Span-grounding rate</span><span class="metric-tile-value">≥99%</span></div>
+        <div class="metric-bar"><div class="metric-bar-fill" style="width:99%"></div></div>
+        <div class="metric-tile-footer"><span class="code-inline">extraction_core</span> suite</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-tile-header"><span class="metric-tile-name">Retrieval recall@4</span><span class="metric-tile-value">≥95%</span></div>
+        <div class="metric-bar"><div class="metric-bar-fill" style="width:95%"></div></div>
+        <div class="metric-tile-footer">decisive clause · <span class="code-inline">retrieval</span> suite</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-tile-header"><span class="metric-tile-name">Applicability precision</span><span class="metric-tile-value">100%</span></div>
+        <div class="metric-bar"><div class="metric-bar-fill" style="width:100%"></div></div>
+        <div class="metric-tile-footer"><span class="code-inline">retrieval</span> suite</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-tile-header"><span class="metric-tile-name">Numeric-rule verdict accuracy</span><span class="metric-tile-value">≥99%</span></div>
+        <div class="metric-bar"><div class="metric-bar-fill" style="width:99%"></div></div>
+        <div class="metric-tile-footer">deterministic rules · <span class="code-inline">numeric_rules</span></div>
+      </div>
+      <div class="metric-tile metric-tile-blocker">
+        <div class="metric-tile-header"><span class="metric-tile-name">Hallucinated-citation rate</span><span class="metric-tile-value metric-tile-value-blocker">0</span></div>
+        <div class="metric-tile-flag">RELEASE BLOCKER — not a metric to improve, a gate to pass</div>
+        <div class="metric-tile-footer"><span class="code-inline">verdict</span> suite</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-tile-header"><span class="metric-tile-name">Abstention correctness</span><span class="metric-tile-value">≥90%</span></div>
+        <div class="metric-bar"><div class="metric-bar-fill" style="width:90%"></div></div>
+        <div class="metric-tile-footer"><span class="code-inline">abstention</span> suite</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-tile-header"><span class="metric-tile-name">Latency, p95</span><span class="metric-tile-value">&lt;10s</span></div>
+        <div class="metric-tile-footer">end-to-end per document · load test</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-tile-header"><span class="metric-tile-name">Cost per document</span><span class="metric-tile-value">tracked</span></div>
+        <div class="metric-tile-footer">recorded on every assessment row, published</div>
+      </div>
+    </div>
     <p style="margin-top:20px;"><strong>Release gate — ships when all six are true, not before:</strong></p>
     <ul>
       <li>A live URL an evaluator can open at any hour and get a cited verdict in under 10 seconds, no cold start, no signup</li>
@@ -243,19 +274,40 @@ analyst           │  auth · tenant scope · idempotency      │
 
   <section class="case-section reveal">
     <h2>Architectural decisions of record</h2>
-    <table class="adr-table">
-      <thead><tr><th>Decision</th><th>Rejected alternative</th><th>Rationale</th></tr></thead>
-      <tbody>
-        <tr><td>Three stages joined by database rows</td><td>One monolithic prompt</td><td>Per-stage measurement; independent failure attribution</td></tr>
-        <tr><td>Citation validation in code</td><td>Prompt-level instruction</td><td>A prompt cannot guarantee an invariant</td></tr>
-        <tr><td>Mandatory as-of date on retrieval</td><td>Timeless corpus</td><td>Four concurrent temporal layers; wrong in both directions otherwise</td></tr>
-        <tr><td>Deterministic conflict trigger</td><td>Agentic planner</td><td>An open-ended planner can't be asserted about in a test</td></tr>
-        <tr><td>Redacted spans, no document bytes</td><td>Full copy, or offsets only</td><td>Auditable without holding customer data</td></tr>
-        <tr><td>Apache-2.0 base model for the fine-tune</td><td>Llama community licence</td><td>Removes attribution, naming, and MAU flow-down constraints for in-VPC sale</td></tr>
-        <tr><td>Rules run before models</td><td>A model call for every check</td><td>Nine obligations are arithmetic; arithmetic should be exact and free</td></tr>
-        <tr><td>Public corpus manifest</td><td>Internal only</td><td>Makes the product's central claim externally checkable</td></tr>
-      </tbody>
-    </table>
+    <div class="adr-board">
+      <div class="adr-card">
+        <div class="adr-card-decision">Three stages joined by database rows</div>
+        <div class="adr-card-meta"><span><strong>Rejected:</strong> one monolithic prompt</span><span><strong>Why:</strong> per-stage measurement, independent failure attribution</span></div>
+      </div>
+      <div class="adr-card">
+        <div class="adr-card-decision">Citation validation in code</div>
+        <div class="adr-card-meta"><span><strong>Rejected:</strong> prompt-level instruction</span><span><strong>Why:</strong> a prompt cannot guarantee an invariant</span></div>
+      </div>
+      <div class="adr-card">
+        <div class="adr-card-decision">Mandatory as-of date on retrieval</div>
+        <div class="adr-card-meta"><span><strong>Rejected:</strong> timeless corpus</span><span><strong>Why:</strong> four concurrent temporal layers; wrong in both directions otherwise</span></div>
+      </div>
+      <div class="adr-card">
+        <div class="adr-card-decision">Deterministic conflict trigger</div>
+        <div class="adr-card-meta"><span><strong>Rejected:</strong> agentic planner</span><span><strong>Why:</strong> an open-ended planner can't be asserted about in a test</span></div>
+      </div>
+      <div class="adr-card">
+        <div class="adr-card-decision">Redacted spans, no document bytes</div>
+        <div class="adr-card-meta"><span><strong>Rejected:</strong> full copy, or offsets only</span><span><strong>Why:</strong> auditable without holding customer data</span></div>
+      </div>
+      <div class="adr-card">
+        <div class="adr-card-decision">Apache-2.0 base model for the fine-tune</div>
+        <div class="adr-card-meta"><span><strong>Rejected:</strong> Llama community licence</span><span><strong>Why:</strong> removes attribution, naming, and MAU flow-down constraints for in-VPC sale</span></div>
+      </div>
+      <div class="adr-card">
+        <div class="adr-card-decision">Rules run before models</div>
+        <div class="adr-card-meta"><span><strong>Rejected:</strong> a model call for every check</span><span><strong>Why:</strong> nine obligations are arithmetic; arithmetic should be exact and free</span></div>
+      </div>
+      <div class="adr-card">
+        <div class="adr-card-decision">Public corpus manifest</div>
+        <div class="adr-card-meta"><span><strong>Rejected:</strong> internal only</span><span><strong>Why:</strong> makes the product's central claim externally checkable</span></div>
+      </div>
+    </div>
   </section>
 
   <section class="case-section reveal">
