@@ -35,7 +35,7 @@
 <main>
   <div class="case-hero reveal">
     <a href="../index.html#projects" class="breadcrumb">← Back to projects</a>
-    <span class="project-tag">System Design · AI for Regulated Finance</span>
+    <span class="project-tag">In Progress · AI for Regulated Finance</span>
     <h1>ClauseCheck</h1>
     <p class="case-subtitle">
       An AI system that audits NBFC loan files against Reserve Bank of India regulations,
@@ -43,12 +43,66 @@
       actually in force on the date being judged.
     </p>
     <div class="callout">
-      <strong>Status:</strong> Product requirements, system architecture, and a ~12,000-word
-      low-level implementation spec (data model, algorithms, prompts, API contracts, task
-      breakdown with runnable acceptance criteria) are complete and approved for build.
-      Implementation is in progress against that specification.
+      <strong>Status:</strong> Actively being built, against a ~12,000-word low-level spec
+      written before implementation started. The core pipeline runs end to end on real
+      infrastructure — document in, cited verdict out — and the trust-critical property
+      (zero hallucinated citations) is already met and measured. The hardest part,
+      judgment-based verdict accuracy, is still weak and is exactly what I'm iterating on
+      right now. I keep a metrics-history file updated on every real change, so what
+      follows is current numbers, not a snapshot from the design phase.
     </div>
   </div>
+
+  <section class="case-section reveal">
+    <h2>Current progress — measured, not claimed</h2>
+    <p>
+      These are live numbers from the running system, not projections from the spec. I'd
+      rather show real numbers going the wrong way and being worked on than a polished
+      "98% done."
+    </p>
+    <div class="metric-dashboard">
+      <div class="metric-tile metric-tile-good">
+        <div class="metric-tile-header"><span class="metric-tile-name">Hallucinated-citation rate</span><span class="metric-tile-value">0.0</span></div>
+        <div class="metric-tile-footer">across every eval suite run so far — the core trust property, enforced by a citation validator in code</div>
+      </div>
+      <div class="metric-tile metric-tile-good">
+        <div class="metric-tile-header"><span class="metric-tile-name">Deterministic-rule verdict accuracy</span><span class="metric-tile-value">100%</span></div>
+        <div class="metric-tile-footer">on 49 live test cases (currency limits, mandatory timelines)</div>
+      </div>
+      <div class="metric-tile metric-tile-good">
+        <div class="metric-tile-header"><span class="metric-tile-name">End-to-end pipeline</span><span class="metric-tile-value">live</span></div>
+        <div class="metric-tile-footer">document → extraction → retrieval → verdict → audit trail, proven against real Postgres + Redis, zero infra blockers</div>
+      </div>
+      <div class="metric-tile metric-tile-good">
+        <div class="metric-tile-header"><span class="metric-tile-name">Real regulatory corpus ingested</span><span class="metric-tile-value">211</span></div>
+        <div class="metric-tile-footer">clauses parsed from an actual RBI Master Direction through a custom PDF parser/chunker/embedder</div>
+      </div>
+      <div class="metric-tile metric-tile-warn">
+        <div class="metric-tile-flag-warn">CURRENT FOCUS — hardest part of the system</div>
+        <div class="metric-tile-header"><span class="metric-tile-name">Judgment-requiring verdict accuracy</span><span class="metric-tile-value metric-tile-value-warn">~31%</span></div>
+        <div class="metric-bar"><div class="metric-bar-fill metric-bar-fill-warn" style="width:31%"></div></div>
+        <div class="metric-tile-footer">deciding compliant vs. violation when it's not a simple numeric rule</div>
+      </div>
+      <div class="metric-tile metric-tile-warn">
+        <div class="metric-tile-header"><span class="metric-tile-name">Extraction span-grounding</span><span class="metric-tile-value metric-tile-value-warn">~48%</span></div>
+        <div class="metric-bar"><div class="metric-bar-fill metric-bar-fill-warn" style="width:48%"></div></div>
+        <div class="metric-tile-footer">extracted values are usually right; the literal supporting quote often isn't</div>
+      </div>
+      <div class="metric-tile metric-tile-warn">
+        <div class="metric-tile-header"><span class="metric-tile-name">Abstention correctness</span><span class="metric-tile-value metric-tile-value-warn">82.5%</span></div>
+        <div class="metric-bar"><div class="metric-bar-fill metric-bar-fill-warn" style="width:82.5%"></div></div>
+        <div class="metric-tile-footer">knowing when to say "no clause found" instead of guessing</div>
+      </div>
+    </div>
+    <p style="margin-top:20px;">
+      <strong>Root-caused, not just measured:</strong> the judgment-accuracy gap splits into
+      two distinct failure modes — retrieval missing the right clause (~45% of failures) versus
+      the model being under-confident even when handed the right clause (~55%). Those need
+      different fixes, which is the point of measuring per stage instead of reporting one
+      blended number. Two regulatory instruments in the corpus are still placeholder text
+      rather than real RBI text, pending sourcing — tracked openly, not glossed over.
+    </p>
+  </section>
 
   <section class="case-section reveal">
     <h2>The problem</h2>
@@ -71,6 +125,13 @@
 
   <section class="case-section reveal">
     <h2>Architecture — three stages, joined only by database rows</h2>
+    <p>
+      <strong>Current stack:</strong> Python/FastAPI · Celery + Redis for async task
+      processing · PostgreSQL 16 + pgvector for hybrid vector-and-full-text retrieval ·
+      SQLAlchemy 2.0 (async) + Alembic · LiteLLM routing to Gemini for extraction and
+      verdict generation · a 7-suite structured eval harness · Prometheus metrics ·
+      full CI (ruff, black, mypy strict).
+    </p>
     <pre class="case-diagram">                 ┌────────────────────────────────────────┐
 compliance  ────▶ │  FastAPI gateway                       │
 analyst           │  auth · tenant scope · idempotency      │
@@ -167,10 +228,12 @@ analyst           │  auth · tenant scope · idempotency      │
   </section>
 
   <section class="case-section reveal">
-    <h2>Product metrics — what would actually sit on a CTO's dashboard</h2>
+    <h2>Product metrics — v1 targets, tracked against the numbers above</h2>
     <p>
-      Every metric below is measured per stage, published, and traces to a specific eval
-      suite — not a single blended accuracy number, which hides where the errors live.
+      These are the release targets the spec sets, each traced to a specific eval suite —
+      not a single blended accuracy number, which hides where the errors live. The
+      "Current progress" section above is where the system actually stands against them
+      today.
     </p>
     <div class="metric-dashboard">
       <div class="metric-tile">
@@ -324,11 +387,12 @@ analyst           │  auth · tenant scope · idempotency      │
       <li>The evaluation architecture and the specific metrics that would catch a regression before a customer would</li>
       <li>Deployment topology, load-testing plan, and an alerting policy deliberately capped at two alerts, because noisy alerts on a solo-operated system are worse than none</li>
       <li>A task breakdown with acceptance criteria written as runnable commands, not prose — so "done" has one definition</li>
+      <li>A metrics-history file updated on every real change during the build, and a failure taxonomy that splits a single bad number into distinct root causes (e.g. retrieval miss vs. model under-confidence) instead of reporting one blended accuracy figure</li>
     </ul>
     <p>
       That's the same shape of ownership I'd bring to a production LLM system on a team:
       not just writing the model-calling code, but making — and being accountable for —
-      the trade-offs around it.
+      the trade-offs around it, including showing the numbers that aren't good yet.
     </p>
   </section>
 

@@ -152,35 +152,34 @@
 
       <div class="project-card" id="project-clausecheck">
         <div class="project-card-header">
-          <span class="project-tag">System Design · AI for Regulated Finance</span>
+          <span class="project-tag">In Progress · AI for Regulated Finance</span>
           <h3>ClauseCheck</h3>
           <p class="project-oneliner">RBI-grounded lending compliance auditor for Indian NBFCs</p>
         </div>
         <p class="project-desc">
-          A fully specified AI system that audits NBFC loan files against Reserve Bank
-          of India regulations — solving a problem most LLM tools get wrong: a citation
-          is only correct if the regulation was actually in force on the date being
-          judged. ClauseCheck ingests loan documents (Key Facts Statements, agreements,
-          closure sets, collections-call transcripts), extracts roughly sixty typed
-          fields per file, and returns a per-obligation verdict — compliant, violation,
-          ambiguous, or not applicable — each backed by an exact clause citation scoped
-          to the correct point in time.
+          A retrospective compliance-audit system for Indian NBFCs: it ingests a lender's
+          own loan documents and collections-call transcripts, extracts typed facts,
+          resolves which RBI regulations were legally in force on the event date,
+          retrieves the governing clauses, and issues a cited verdict — compliant,
+          violation, ambiguous, or no-clause-found — with a hard architectural guarantee
+          that no verdict can cite a clause that doesn't exist or wasn't in force at the
+          time.
         </p>
         <p class="project-desc">
-          The core design principle is enforced in code, not prompts: the system cannot
-          cite a clause that wasn't in effect, and it declines to manufacture a
-          violation where the rulebook is silent. Designed as a three-stage
-          architecture with deterministic conflict detection and date-arithmetic
-          checks layered on top of LLM-based extraction and retrieval.
+          That guarantee is already measured, not just designed: hallucinated-citation
+          rate is 0.0 across every eval suite run so far, enforced by a citation
+          validator in code. The harder part — judgment calls on ambiguous compliance
+          questions — is still weak and actively being worked on, and I track both in
+          the open rather than polishing the number before showing it.
         </p>
         <div class="project-meta">
           <div class="project-tech">
-            <span>Multi-stage LLM pipeline</span>
-            <span>Temporal-aware retrieval</span>
-            <span>Structured extraction</span>
-            <span>Rule-based conflict detection</span>
+            <span>FastAPI + Celery/Redis</span>
+            <span>Postgres 16 + pgvector</span>
+            <span>LiteLLM → Gemini</span>
+            <span>7-suite eval harness</span>
           </div>
-          <p class="project-status">Status: architecture, data model, and full build specification complete — implementation in progress</p>
+          <p class="project-status">Status: core pipeline live end-to-end on real infra — hallucinated-citation rate 0.0, deterministic-rule accuracy 100% (49 cases); judgment-based verdict accuracy (~31%) is the current focus</p>
           <a href="projects/clausecheck.html" class="case-link">Read the full case study →</a>
         </div>
       </div>

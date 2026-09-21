@@ -897,6 +897,20 @@ footer {
   color: #ff6b6b;
   margin-bottom: 10px;
 }
+.metric-tile-warn {
+  border-color: rgba(240,180,41,0.35);
+  background: rgba(240,180,41,0.05);
+}
+.metric-tile-value-warn { color: #f0b429; }
+.metric-tile-flag-warn {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #f0b429;
+  margin-bottom: 6px;
+}
+.metric-bar-fill-warn { background: linear-gradient(90deg, #f0b429, #ff6b6b); }
+.metric-tile-good { border-color: rgba(126,240,200,0.35); }
 
 /* ADR decision-log board */
 .adr-board {
