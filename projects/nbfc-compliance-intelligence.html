@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NBFC Compliance Intelligence — Rajan N</title>
+<meta name="description" content="NBFC Compliance Intelligence: a live, production-deployed RBI-compliance auditor for Indian NBFC lenders.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html#top" class="logo">RN<span class="dot">.</span></a>
+    <button id="navToggle" class="nav-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="../index.html#about">About</a></li>
+      <li><a href="../index.html#skills">Skills</a></li>
+      <li><a href="../index.html#projects">Projects</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+  <div class="case-hero reveal">
+    <a href="../index.html#projects" class="breadcrumb">← Back to projects</a>
+    <span class="project-tag">Live · Full-Stack · AI for Regulated Finance</span>
+    <h1>NBFC Compliance Intelligence</h1>
+    <p class="case-subtitle">
+      A retrospective RBI-compliance auditor for Indian NBFC lenders — deployed and
+      running in production, not a slide deck. It ingests a lender's own loan documents
+      and collections-call transcripts, and issues a cited, auditable verdict on every
+      obligation, with a hard guarantee that no verdict can cite a regulation that
+      doesn't exist or wasn't in force on the date it matters.
+    </p>
+    <div class="case-cta-row">
+      <a href="https://nbfc-compliance-intelligence.nrajan.in/" target="_blank" rel="noopener" class="btn btn-primary magnetic">View live product ↗</a>
+      <a href="#architecture" class="btn btn-outline magnetic">See how it works ↓</a>
+    </div>
+  </div>
+
+  <section class="case-section reveal">
+    <h2>The problem</h2>
+    <p>
+      Indian NBFCs operate under dense, frequently-amended RBI directions covering
+      digital lending, recovery practices, disclosure, and grievance redressal.
+      Compliance teams audit loan documents and call transcripts by hand against
+      regulation text that keeps changing — slow, error-prone, and with no systematic
+      way to prove which version of a rule applied to which event date. This system
+      automates that retrospective audit end to end, while keeping a paper trail a
+      human — or a regulator — can actually follow.
+    </p>
+  </section>
+
+  <section class="case-section reveal" id="architecture">
+    <h2>Architecture — four stages, each independently testable</h2>
+    <p>
+      <strong>Extract</strong> → an LLM pulls ~80 typed fields from raw document text
+      against a versioned schema, every value grounded in a quoted, PII-redacted span
+      of the source. <strong>Retrieve</strong> → resolves the regulatory corpus as of
+      the event date (never "today"), via hybrid vector + lexical search fused with
+      Reciprocal Rank Fusion. <strong>Decide</strong> → 28 hand-written deterministic
+      rules run first; the model is only called when no rule resolves the fact, and
+      every decision is logged with which one made it. <strong>Validate</strong> → the
+      hard guarantee: no verdict ships without a citation that resolves to a real
+      clause whose effective window contains the event date, enforced by a dedicated
+      validator in code — a failure downgrades to "no clause found" rather than
+      passing silently through.
+    </p>
+    <div class="case-stats">
+      <div class="case-stat"><span class="case-stat-num">~80</span><span class="case-stat-label">typed fields extracted per document, each grounded in a redacted source quote</span></div>
+      <div class="case-stat"><span class="case-stat-num">28</span><span class="case-stat-label">deterministic compliance rules that run before any model call</span></div>
+      <div class="case-stat"><span class="case-stat-num">4</span><span class="case-stat-label">verdict classes: compliant, violation, ambiguous, no clause found</span></div>
+      <div class="case-stat"><span class="case-stat-num">0</span><span class="case-stat-label">raw documents ever persisted — not in the database, logs, or task queue</span></div>
+    </div>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>A real production bug, found and fixed</h2>
+    <p>
+      Not a hypothetical — this happened. A local, from-scratch reproduction of the
+      full stack (Postgres, Redis, Celery — no Docker daemon available, so everything
+      was provisioned from raw packages) surfaced that the assessment pipeline was
+      making its per-fact LLM calls sequentially. Eight facts took 33.8 seconds; a real
+      document with 15–20 facts would blow past any reasonable timeout. The fix: fan
+      the independent per-fact assessments out concurrently, bounded by a semaphore —
+      roughly a 4x wall-clock improvement, with a regression test written specifically
+      so it can't silently regress back to sequential.
+    </p>
+    <div class="metric-dashboard">
+      <div class="metric-tile metric-tile-blocker">
+        <div class="metric-tile-header"><span class="metric-tile-name">Before — 8 facts, sequential</span><span class="metric-tile-value metric-tile-value-blocker">33.8s</span></div>
+        <div class="metric-tile-footer">would exceed timeout on a real 15–20 field document</div>
+      </div>
+      <div class="metric-tile metric-tile-good">
+        <div class="metric-tile-header"><span class="metric-tile-name">After — concurrent, semaphore-bounded</span><span class="metric-tile-value">~4x faster</span></div>
+        <div class="metric-tile-footer">plus a regression test guarding against a silent regression</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Security and data posture</h2>
+    <ul>
+      <li><strong>Zero raw-document persistence by architectural constraint</strong> — extraction runs synchronously inside the API request, so document text never crosses a message-broker boundary in the first place.</li>
+      <li><strong>Row-level security</strong> in Postgres for tenant isolation, plus SHA-256 tenant-token auth.</li>
+      <li><strong>Content-free logging</strong> — ids, durations, hashes, and verdicts, never document content — with full LLM cost/latency/token accounting per call.</li>
+      <li><strong>Versioned, hash-pinned regulatory corpus</strong> — the ingest pipeline records source URL, retrieval timestamp, and content hash for every clause; nobody hand-edits regulation text.</li>
+    </ul>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Deployment</h2>
+    <p>
+      Live on Fly.io: four processes (Redis, Celery worker, backend API, reverse-proxy
+      gateway) inside a single Firecracker microVM for near-zero cost, with the backend
+      bound to loopback-only and only the gateway internet-facing — genuine
+      defense-in-depth, not cosmetic. Neon serverless Postgres for the database tier,
+      with a custom domain and TLS via Fly-managed Let's Encrypt certificates. The demo
+      frontend is hand-built with no framework: client-side PDF parsing (no backend
+      load) and a live 5-stage pipeline visualization driven entirely by real telemetry
+      — no fabricated data.
+    </p>
+    <div class="case-cta-row">
+      <a href="https://nbfc-compliance-intelligence.nrajan.in/" target="_blank" rel="noopener" class="btn btn-primary magnetic">Try the live product ↗</a>
+    </div>
+  </section>
+
+  <section class="case-section reveal">
+    <h2>Ownership</h2>
+    <p>
+      I designed and shipped this alone, end to end: the regulatory data model, the
+      four-stage pipeline, the security posture, the deployment topology, and the
+      incident above — root-caused by reproducing the full stack locally rather than
+      guessing at the fix. Same shape of ownership I'd bring to a production LLM system
+      on a team: not just the model-calling code, but the trade-offs, the failure
+      modes, and being accountable for both.
+    </p>
+  </section>
+
+  <div class="case-cta reveal">
+    <a href="../index.html#projects" class="btn btn-outline magnetic">← Back to projects</a>
+    <a href="../index.html#contact" class="btn btn-primary magnetic">Get in touch</a>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; <span id="year"></span> Rajan N. Built with plain HTML, CSS &amp; JS.</p>
+</footer>
+
+<script src="../script.js"></script>
+</body>
+</html>

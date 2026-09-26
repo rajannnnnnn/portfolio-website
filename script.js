@@ -208,7 +208,7 @@ if (canvas && !prefersReducedMotion) {
         const dy = nodes[i].y - nodes[j].y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < maxDist) {
-          ctx.strokeStyle = `rgba(124,156,255,${0.14 * (1 - dist / maxDist)})`;
+          ctx.strokeStyle = `rgba(37,99,235,${0.14 * (1 - dist / maxDist)})`;
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.moveTo(nodes[i].x, nodes[i].y);
@@ -220,7 +220,7 @@ if (canvas && !prefersReducedMotion) {
       const dym = nodes[i].y - mouseY;
       const dm = Math.sqrt(dxm * dxm + dym * dym);
       if (dm < 160) {
-        ctx.strokeStyle = `rgba(126,240,200,${0.3 * (1 - dm / 160)})`;
+        ctx.strokeStyle = `rgba(4,120,87,${0.3 * (1 - dm / 160)})`;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(nodes[i].x, nodes[i].y);
@@ -232,7 +232,7 @@ if (canvas && !prefersReducedMotion) {
     nodes.forEach(n => {
       ctx.beginPath();
       ctx.arc(n.x, n.y, 1.6, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(238,240,244,0.55)';
+      ctx.fillStyle = 'rgba(20,23,31,0.45)';
       ctx.fill();
     });
 
