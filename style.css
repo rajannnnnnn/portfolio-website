@@ -454,6 +454,53 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
   margin-bottom: 14px;
 }
 
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.tag-row .project-tag { margin-bottom: 0; }
+
+.alpha-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b45309;
+  background: rgba(240,180,41,0.14);
+  border: 1px solid rgba(240,180,41,0.45);
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+.alpha-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f0b429;
+  box-shadow: 0 0 0 0 rgba(240,180,41,0.5);
+  animation: alphapulse 2s ease infinite;
+}
+@keyframes alphapulse {
+  0% { box-shadow: 0 0 0 0 rgba(240,180,41,0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(240,180,41,0); }
+  100% { box-shadow: 0 0 0 0 rgba(240,180,41,0); }
+}
+
+.callout-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color .2s ease;
+}
+.callout-link:hover { color: var(--accent-2); }
+
 .project-card h3 {
   font-size: 1.6rem;
   margin-bottom: 6px;
@@ -725,7 +772,7 @@ footer {
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal, .reveal > *, .project-card, .more-card, .btn, .cursor-blink, .live-link::before {
+  .reveal, .reveal > *, .project-card, .more-card, .btn, .cursor-blink, .live-link::before, .alpha-badge::before {
     transition: none !important;
     animation: none !important;
     opacity: 1 !important;

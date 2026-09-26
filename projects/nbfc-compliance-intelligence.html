@@ -35,15 +35,34 @@
 <main>
   <div class="case-hero reveal">
     <a href="../index.html#projects" class="breadcrumb">← Back to projects</a>
-    <span class="project-tag">Live · Full-Stack · AI for Regulated Finance</span>
+    <div class="tag-row">
+      <span class="project-tag">Full-Stack · AI for Regulated Finance</span>
+      <span class="alpha-badge">Live Alpha</span>
+    </div>
     <h1>NBFC Compliance Intelligence</h1>
     <p class="case-subtitle">
       A retrospective RBI-compliance auditor for Indian NBFC lenders — deployed and
-      running in production, not a slide deck. It ingests a lender's own loan documents
-      and collections-call transcripts, and issues a cited, auditable verdict on every
+      running, not a slide deck. It ingests a lender's own loan documents and
+      collections-call transcripts, and issues a cited, auditable verdict on every
       obligation, with a hard guarantee that no verdict can cite a regulation that
       doesn't exist or wasn't in force on the date it matters.
     </p>
+    <div class="callout callout-warn">
+      <strong>Heads up if you're about to try the live product.</strong> This is a live
+      alpha — I put it in front of people early on purpose. The trust properties are
+      already at target: <strong>0 hallucinated citations</strong> across every eval
+      suite, <strong>100% deterministic-rule accuracy</strong> on the numeric obligations
+      (currency limits, mandatory timelines, etc.). The harder part — judgment calls on
+      ambiguous compliance questions — is currently at <strong>~31%</strong>, root-caused
+      into retrieval-miss (~45% of failures) vs. model under-confidence (~55%), and is
+      exactly what I'm iterating on right now. If you hit a wrong answer, that's why —
+      and the fix path is the interesting engineering, not the number itself.
+      <br><br>
+      <strong>Recruiter or engineer with questions?</strong> Reach me at
+      <a href="mailto:rajanofficial002@gmail.com" class="callout-link">rajanofficial002@gmail.com</a>
+      or on <a href="https://www.linkedin.com/in/rajan-n-a30014235/" target="_blank" rel="noopener" class="callout-link">LinkedIn</a>
+      — happy to walk through the architecture or discuss what I'm working on next.
+    </div>
     <div class="case-cta-row">
       <a href="https://nbfc-compliance-intelligence.nrajan.in/" target="_blank" rel="noopener" class="btn btn-primary magnetic">View live product ↗</a>
       <a href="#architecture" class="btn btn-outline magnetic">See how it works ↓</a>
