@@ -131,9 +131,14 @@
 
         const ctx = canvas.getContext('2d');
         await page.render({ canvasContext: ctx, viewport }).promise;
+
+        // Hide the loading spinner as soon as the first page is on screen —
+        // subsequent pages append under it without the stale "Loading…" message.
+        if (i === 1) {
+          rendered = true;
+          loading.hidden = true;
+        }
       }
-      rendered = true;
-      loading.hidden = true;
     } catch (e) {
       console.error('pdf render failed', e);
       fail();
