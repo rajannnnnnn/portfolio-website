@@ -69,7 +69,8 @@
 </footer>
 
 <script src="script.js"></script>
-<script type="module">
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script>
   // Auto-fetch the last-updated date from GitHub Commits API
   (async function fetchResumeDate() {
     const el = document.getElementById('resumeDate');
@@ -91,10 +92,6 @@
     }
   })();
 
-  // Render the PDF with PDF.js so it displays inline on every device, including mobile
-  import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs';
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
-
   const loading = document.getElementById('resumeLoading');
   const container = document.getElementById('resumePages');
   const fallback = document.getElementById('resumeFallback');
@@ -112,6 +109,8 @@
 
   async function renderResume() {
     try {
+      if (typeof pdfjsLib === 'undefined') { fail(); return; }
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
       const task = pdfjsLib.getDocument('rn-cv.pdf');
       const pdf = await task.promise;
       const target = Math.min(container.clientWidth || window.innerWidth - 60, 1000);
