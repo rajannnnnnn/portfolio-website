@@ -50,11 +50,16 @@
     </div>
 
     <div class="resume-viewer-wrap">
-      <object data="rn-cv.pdf#view=FitH&toolbar=1" type="application/pdf" class="resume-viewer" aria-label="Resume PDF">
-        <div class="resume-viewer-fallback">
-          <p>Your browser can't display the PDF inline. Use the buttons above to download it or open in a new tab.</p>
-        </div>
-      </object>
+      <div class="resume-viewer-loading" id="resumeLoading">
+        <div class="resume-spinner" aria-hidden="true"></div>
+        <p>Loading resume…</p>
+      </div>
+      <div id="resumePages" class="resume-pages"></div>
+      <div class="resume-viewer-fallback" id="resumeFallback" hidden>
+        <p>Can't render the PDF inline here.
+          <a href="rn-cv.pdf" target="_blank" rel="noopener">Open it in a new tab</a>
+          or <a href="rn-cv.pdf" download>download it</a>.</p>
+      </div>
     </div>
   </div>
 </main>
@@ -64,7 +69,8 @@
 </footer>
 
 <script src="script.js"></script>
-<script>
+<script type="module">
+  // Auto-fetch the last-updated date from GitHub Commits API
   (async function fetchResumeDate() {
     const el = document.getElementById('resumeDate');
     try {
@@ -84,6 +90,58 @@
       el.textContent = 'Last updated recently';
     }
   })();
+
+  // Render the PDF with PDF.js so it displays inline on every device, including mobile
+  import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+
+  const loading = document.getElementById('resumeLoading');
+  const container = document.getElementById('resumePages');
+  const fallback = document.getElementById('resumeFallback');
+  let rendered = false;
+
+  function fail() {
+    if (rendered) return;
+    loading.hidden = true;
+    container.hidden = true;
+    fallback.hidden = false;
+  }
+
+  // Hard safety net: if PDF.js can't load or render within 15s, show the fallback
+  setTimeout(() => { if (!rendered) fail(); }, 15000);
+
+  async function renderResume() {
+    try {
+      const task = pdfjsLib.getDocument('rn-cv.pdf');
+      const pdf = await task.promise;
+      const target = Math.min(container.clientWidth || window.innerWidth - 60, 1000);
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const base = page.getViewport({ scale: 1 });
+        const scale = target / base.width;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const viewport = page.getViewport({ scale: scale * dpr });
+
+        const canvas = document.createElement('canvas');
+        canvas.className = 'resume-page-canvas';
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        canvas.style.width = (viewport.width / dpr) + 'px';
+        canvas.style.height = (viewport.height / dpr) + 'px';
+        container.appendChild(canvas);
+
+        const ctx = canvas.getContext('2d');
+        await page.render({ canvasContext: ctx, viewport }).promise;
+      }
+      rendered = true;
+      loading.hidden = true;
+    } catch (e) {
+      console.error('pdf render failed', e);
+      fail();
+    }
+  }
+
+  renderResume();
 </script>
 </body>
 </html>

@@ -251,19 +251,47 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
   flex-wrap: wrap;
 }
 .resume-viewer-wrap {
-  background: var(--surface);
+  background: var(--bg-alt);
   border: 1px solid var(--surface-border);
   border-radius: 16px;
-  padding: 10px;
-  overflow: hidden;
+  padding: 20px;
+  min-height: 400px;
+  position: relative;
 }
-.resume-viewer {
-  width: 100%;
-  height: min(90vh, 1100px);
+.resume-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+.resume-page-canvas {
   display: block;
-  border: none;
-  border-radius: 10px;
-  background: var(--bg-alt);
+  max-width: 100%;
+  height: auto;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(20,23,31,0.08), 0 10px 30px rgba(20,23,31,0.06);
+  border-radius: 8px;
+}
+.resume-viewer-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 60px 20px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+.resume-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--surface-border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 .resume-viewer-fallback {
   padding: 40px 28px;
@@ -272,8 +300,13 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
 }
 .resume-viewer-fallback a { color: var(--accent); font-weight: 600; }
 
+@media (prefers-reduced-motion: reduce) {
+  .resume-spinner { animation: none; }
+}
+
 @media (max-width: 640px) {
-  .resume-viewer { height: 70vh; }
+  .resume-viewer-wrap { padding: 12px; }
+  .resume-pages { gap: 10px; }
 }
 
 .scroll-cue {
