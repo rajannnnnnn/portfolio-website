@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resume — Rajan N</title>
+<meta name="description" content="Latest resume of Rajan N, Applied AI Engineer.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="index.html#top" class="logo">RN<span class="dot">.</span></a>
+    <button id="navToggle" class="nav-toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#skills">Skills</a></li>
+      <li><a href="index.html#projects">Projects</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+  <div class="resume-page reveal">
+    <a href="index.html#top" class="breadcrumb">← Back to home</a>
+    <div class="resume-header">
+      <div>
+        <p class="section-kicker" style="margin-bottom:8px;">Resume</p>
+        <h1 class="resume-title">Rajan N</h1>
+        <p class="resume-sub">
+          Applied AI Engineer · <span id="resumeDate">loading…</span>
+        </p>
+      </div>
+      <div class="resume-actions">
+        <a href="rn-cv.pdf" download class="btn btn-primary magnetic">Download PDF ↓</a>
+        <a href="rn-cv.pdf" target="_blank" rel="noopener" class="btn btn-outline magnetic">Open in new tab ↗</a>
+      </div>
+    </div>
+
+    <div class="resume-viewer-wrap">
+      <object data="rn-cv.pdf#view=FitH&toolbar=1" type="application/pdf" class="resume-viewer" aria-label="Resume PDF">
+        <div class="resume-viewer-fallback">
+          <p>Your browser can't display the PDF inline. Use the buttons above to download it or open in a new tab.</p>
+        </div>
+      </object>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; <span id="year"></span> Rajan N. Built with plain HTML, CSS &amp; JS.</p>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  (async function fetchResumeDate() {
+    const el = document.getElementById('resumeDate');
+    try {
+      const resp = await fetch(
+        'https://api.github.com/repos/rajannnnnnn/portfolio-website/commits?path=rn-cv.pdf&per_page=1',
+        { headers: { 'Accept': 'application/vnd.github+json' } }
+      );
+      if (!resp.ok) throw new Error('github api ' + resp.status);
+      const data = await resp.json();
+      if (!Array.isArray(data) || data.length === 0) throw new Error('no commits');
+      const iso = data[0].commit && data[0].commit.author && data[0].commit.author.date;
+      if (!iso) throw new Error('no date');
+      const d = new Date(iso);
+      const fmt = d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+      el.textContent = 'Last updated ' + fmt;
+    } catch (e) {
+      el.textContent = 'Last updated recently';
+    }
+  })();
+</script>
+</body>
+</html>
