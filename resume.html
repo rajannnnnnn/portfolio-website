@@ -39,9 +39,11 @@
       <div>
         <p class="section-kicker" style="margin-bottom:8px;">Resume</p>
         <h1 class="resume-title">Rajan N</h1>
-        <p class="resume-sub">
-          Applied AI Engineer · <span id="resumeDate">loading…</span>
-        </p>
+        <p class="resume-sub">Applied AI Engineer</p>
+        <span class="resume-freshness" id="resumeDate" aria-live="polite">
+          <span class="resume-freshness-dot" aria-hidden="true"></span>
+          <span class="resume-freshness-label">Checking freshness…</span>
+        </span>
       </div>
       <div class="resume-actions">
         <a href="rn-cv.pdf" download class="btn btn-primary magnetic">Download PDF ↓</a>
@@ -71,25 +73,53 @@
 <script src="script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <script>
-  // Auto-fetch the last-updated date from GitHub Commits API
-  (async function fetchResumeDate() {
-    const el = document.getElementById('resumeDate');
-    try {
-      const resp = await fetch(
-        'https://api.github.com/repos/rajannnnnnn/portfolio-website/commits?path=rn-cv.pdf&per_page=1',
-        { headers: { 'Accept': 'application/vnd.github+json' } }
-      );
-      if (!resp.ok) throw new Error('github api ' + resp.status);
-      const data = await resp.json();
-      if (!Array.isArray(data) || data.length === 0) throw new Error('no commits');
-      const iso = data[0].commit && data[0].commit.author && data[0].commit.author.date;
-      if (!iso) throw new Error('no date');
-      const d = new Date(iso);
-      const fmt = d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-      el.textContent = 'Last updated ' + fmt;
-    } catch (e) {
-      el.textContent = 'Last updated recently';
+  // Auto-fetch the last-updated date from GitHub Commits API, format as a
+  // fresh-sounding relative label, and set an age tier so CSS can style
+  // very-fresh updates in a brighter accent.
+  (function fetchResumeDate() {
+    const root = document.getElementById('resumeDate');
+    const label = root && root.querySelector('.resume-freshness-label');
+    function set(text, tier) {
+      if (!label) return;
+      label.textContent = text;
+      if (tier) root.setAttribute('data-fresh', tier);
     }
+    function relLabel(iso) {
+      const d = new Date(iso);
+      const now = Date.now();
+      const days = Math.floor((now - d.getTime()) / 86400000);
+      if (days <= 0) return { text: 'Updated today', tier: 'hot' };
+      if (days === 1) return { text: 'Updated yesterday', tier: 'hot' };
+      if (days < 7) return { text: 'Updated ' + days + ' days ago', tier: 'hot' };
+      if (days < 14) return { text: 'Updated last week', tier: 'warm' };
+      if (days < 30) return { text: 'Updated ' + Math.floor(days / 7) + ' weeks ago', tier: 'warm' };
+      if (days < 60) return { text: 'Updated last month', tier: 'warm' };
+      if (days < 365) return {
+        text: 'Updated ' + d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }),
+        tier: 'cool'
+      };
+      return {
+        text: 'Updated ' + d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }),
+        tier: 'cool'
+      };
+    }
+    (async () => {
+      try {
+        const resp = await fetch(
+          'https://api.github.com/repos/rajannnnnnn/portfolio-website/commits?path=rn-cv.pdf&per_page=1',
+          { headers: { 'Accept': 'application/vnd.github+json' } }
+        );
+        if (!resp.ok) throw new Error('github api ' + resp.status);
+        const data = await resp.json();
+        if (!Array.isArray(data) || data.length === 0) throw new Error('no commits');
+        const iso = data[0].commit && data[0].commit.author && data[0].commit.author.date;
+        if (!iso) throw new Error('no date');
+        const { text, tier } = relLabel(iso);
+        set(text, tier);
+      } catch (e) {
+        set('Updated recently', 'warm');
+      }
+    })();
   })();
 
   const loading = document.getElementById('resumeLoading');
